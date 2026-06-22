@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Target — gobuster-recon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">GOBUSTER-RECON</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="dir-board.html">Directory Board</a>
+    <a href="https://github.com/fmfalgun/gobuster-recon" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href="https://fmfalgun.github.io" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+  </div>
+</nav>
+
+<div class="target-header">
+  <span class="target-url-display" id="target-url-display">—</span>
+  <span class="target-contributor" id="contributor-meta"></span>
+</div>
+
+<section id="stats-row" class="stats-row">
+  <div class="stat-badge">
+    <span class="stat-value" id="val-finding-count">—</span>
+    <span class="stat-label">Paths Found</span>
+  </div>
+  <div class="stat-badge">
+    <span class="stat-value" id="val-status-2xx">—</span>
+    <span class="stat-label">2xx Responses</span>
+  </div>
+  <div class="stat-badge">
+    <span class="stat-value" id="val-wordlist">—</span>
+    <span class="stat-label">Wordlist</span>
+  </div>
+  <div class="stat-badge">
+    <span class="stat-value" id="val-method">—</span>
+    <span class="stat-label">Method</span>
+  </div>
+</section>
+
+<main>
+
+  <p id="scanned-at-line">data as of <span id="scanned-at">—</span></p>
+
+  <!-- Exposure Flags -->
+  <div class="section" id="section-exposure">
+    <h2 class="section-title">Exposure Flags</h2>
+    <div id="exposure-flags"></div>
+  </div>
+
+  <!-- Findings Table -->
+  <div class="section" id="section-findings">
+    <h2 class="section-title">Found Paths</h2>
+    <div id="findings-container"></div>
+  </div>
+
+  <div id="error-box" style="display:none">
+    <span id="error-message"></span>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <a href="dir-board.html">← Directory Board</a>
+  &nbsp;·&nbsp; gobuster-recon &nbsp;·&nbsp;
+  <a href="https://github.com/fmfalgun/gobuster-recon" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+</footer>
+
+<script src="assets/js/target.js"></script>
+
+</body>
+</html>

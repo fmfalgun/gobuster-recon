@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gobuster-recon — Directory Brute-Force &amp; Hidden Path Discovery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">GOBUSTER-RECON</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-active">Home</a>
+    <a href="dir-board.html">Directory Board</a>
+    <a href="https://github.com/fmfalgun/gobuster-recon" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href="https://fmfalgun.github.io" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>GOBUSTER <span>RECON</span></h1>
+  <p class="hero-tagline">Directory brute-force · hidden path discovery · admin/login/backup exposure · status code mapping</p>
+  <div class="install-block">
+    <code>python3 gobuster-recon.py -u https://target.com</code>
+  </div>
+  <div class="hero-cta-row">
+    <a href="dir-board.html" class="cta-btn">→ Directory Board</a>
+    <a href="https://github.com/fmfalgun/gobuster-recon" class="cta-ghost" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  </div>
+</section>
+
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="info-panel">
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; WHAT IS GOBUSTER RECON</div>
+      <p class="panel-text">
+        Directory brute-force discovers paths that aren't linked from any page — admin panels, backup files,
+        configuration endpoints, API routes. gobuster-recon runs <span class="inline-code">gobuster dir</span>
+        against a target, parses all found paths with their status codes and redirect chains, classifies
+        dangerous exposures (admin, login, phpMyAdmin, .git, .env, backups), and emits structured JSON.
+        HTTP fallback mode runs a built-in wordlist check via urllib when gobuster is not installed.
+      </p>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; WHY THIS SCRIPT</div>
+      <p class="panel-text">
+        Raw gobuster output is per-line text — no caching, no classification, no history.
+        gobuster-recon adds 24h SQLite caching, structured JSON with exposure flags
+        (<span class="inline-code">has_admin</span>, <span class="inline-code">has_git</span>,
+        <span class="inline-code">has_env</span>, <span class="inline-code">has_backup</span>),
+        automatic wordlist resolution (tries Kali/Parrot paths, falls back to built-in list),
+        and community submission.
+      </p>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; HOW IT WORKS</div>
+      <div class="arch-diagram">
+        <div class="arch-box">INPUT: --url https://target.com</div>
+        <div class="arch-box arch-arrow">↓</div>
+        <div class="arch-box">cache.db (24h TTL)</div>
+        <div class="arch-box arch-arrow">↓ (stale or --no-cache)</div>
+        <div class="arch-box">gobuster binary?
+  YES → gobuster dir -w wordlist
+  NO  → HTTP fallback (urllib HEAD)</div>
+        <div class="arch-box arch-arrow">↓</div>
+        <div class="arch-box">parse paths · status codes · redirects · sizes
+classify: admin / login / phpmyadmin / .git / .env / backup</div>
+        <div class="arch-box arch-arrow">↓</div>
+        <div class="arch-box">JSON output + terminal summary</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- RIGHT MAIN -->
+  <main class="home-main">
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; USAGE</div>
+      <pre class="code-block"><span class="code-comment"># basic scan</span>
+python3 gobuster-recon.py --url https://target.com
+
+<span class="code-comment"># custom wordlist</span>
+python3 gobuster-recon.py --url https://target.com --wordlist /path/to/list.txt
+
+<span class="code-comment"># gobuster mode (default) or HTTP fallback</span>
+python3 gobuster-recon.py --url https://target.com --mode gobuster
+python3 gobuster-recon.py --url https://target.com --mode http
+
+<span class="code-comment"># add file extensions</span>
+python3 gobuster-recon.py --url https://target.com --extensions php,html,txt,bak
+
+<span class="code-comment"># thread count</span>
+python3 gobuster-recon.py --url https://target.com --threads 20
+
+<span class="code-comment"># save JSON output</span>
+python3 gobuster-recon.py --url https://target.com --output results.json
+
+<span class="code-comment"># bypass cache (force fresh scan)</span>
+python3 gobuster-recon.py --url https://target.com --no-cache
+
+<span class="code-comment"># scan and submit to Directory Board</span>
+python3 gobuster-recon.py --url https://target.com --submit</pre>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; OUTPUT SCHEMA</div>
+      <pre class="code-block">{
+  <span class="code-comment">// target info</span>
+  "url": "https://target.com",
+  "mode": "gobuster",
+  "wordlist": "/usr/share/wordlists/dirb/common.txt",
+
+  <span class="code-comment">// path findings</span>
+  "findings": [
+    {
+      "path": "/admin",
+      "status": 200,
+      "size": 4096,
+      "redirect": null
+    },
+    {
+      "path": "/.git/HEAD",
+      "status": 200,
+      "size": 23,
+      "redirect": null
+    }
+  ],
+
+  <span class="code-comment">// summary counts</span>
+  "finding_count": 14,
+  "status_codes": { "200": 8, "301": 4, "403": 2 },
+
+  <span class="code-comment">// exposure flags</span>
+  "has_admin": true,
+  "has_login": false,
+  "has_phpmyadmin": false,
+  "has_git": true,
+  "has_env": false,
+  "has_backup": false
+}</pre>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; HIGH-VALUE FINDS</div>
+      <ul class="panel-list">
+        <li>
+          <span class="inline-code">.git/HEAD</span> — Full source code disclosure.
+          If this returns 200, the entire repo is downloadable:
+          <span class="inline-code">git clone https://target.com/.git</span>
+        </li>
+        <li>
+          <span class="inline-code">.env</span> — Environment file. Contains DB passwords,
+          API keys, app secrets in plaintext. Critical severity if exposed.
+        </li>
+        <li>
+          <span class="inline-code">phpmyadmin</span> — Database admin interface.
+          Unauthenticated access (or default creds) = full DB dump. Frequent on
+          misconfigured shared hosting.
+        </li>
+        <li>
+          <span class="inline-code">*.bak / *.sql / *.zip</span> — Backup files.
+          Database dumps and source archives sitting in webroot — direct credential
+          and schema exposure.
+        </li>
+        <li>
+          <span class="inline-code">admin / dashboard</span> — Admin panels.
+          Login forms not exposed via sitemap = credential attack surface
+          (brute-force, default creds, bypass).
+        </li>
+        <li>
+          <span class="inline-code">xmlrpc.php</span> — WordPress XML-RPC endpoint.
+          <span class="inline-code">system.multicall</span> enables batched brute-force
+          (thousands of password attempts per request). Also a pingback SSRF vector.
+        </li>
+      </ul>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-heading">&gt; WORDLIST RESOLUTION ORDER</div>
+      <ol class="panel-list">
+        <li><span class="inline-code">-w</span> flag if given</li>
+        <li><span class="inline-code">/usr/share/wordlists/dirb/common.txt</span> (Kali default)</li>
+        <li><span class="inline-code">/usr/share/wordlists/dirbuster/directory-list-2.3-small.txt</span></li>
+        <li><span class="inline-code">/usr/share/wordlists/seclists/Discovery/Web-Content/common.txt</span></li>
+        <li>Built-in 60-entry wordlist (always works — no install required)</li>
+      </ol>
+    </div>
+
+    <div class="hof-cta-card">
+      <div class="hof-cta-label">[ // DIRECTORY BOARD ]</div>
+      <div class="hof-cta-desc">
+        Browse community directory scans — finding counts, exposure flags, status code distributions — no tool required.
+      </div>
+      <a href="dir-board.html" class="cta-btn">→ Open Directory Board</a>
+    </div>
+
+  </main>
+
+</div>
+
+<footer class="site-footer">
+  Built by Falgun Marothia &nbsp;·&nbsp; tool: gobuster (Go) &nbsp;·&nbsp;
+  <a href="https://github.com/fmfalgun/gobuster-recon" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  &nbsp;·&nbsp;
+  <a href="dir-board.html">Directory Board</a>
+</footer>
+
+</body>
+</html>

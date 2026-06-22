@@ -1,0 +1,3 @@
+# No pip dependencies.
+# System requirement: apt install gobuster  (or: go install github.com/OJ/gobuster/v3@latest)
+# Python 3.8+ stdlib used: argparse, json, subprocess, urllib.request, sqlite3, pathlib, datetime, shutil, re, tempfile

@@ -1,0 +1,99 @@
+name: Monthly Refresh
+
+on:
+  schedule:
+    - cron: '0 3 1 * *'
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install gobuster
+        run: sudo apt-get install -y gobuster
+        continue-on-error: true
+
+      - name: Refresh active targets
+        run: |
+          python3 - <<'PYEOF'
+          import json, subprocess, datetime
+
+          index_file = 'web/data/index.json'
+          now        = datetime.datetime.utcnow()
+          cutoff     = now - datetime.timedelta(days=90)
+          nowstr     = now.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+          with open(index_file) as f:
+              index = json.load(f)
+
+          active, stale = 0, 0
+          for entry in index.get('targets', []):
+              domain = entry['d']
+              url    = entry.get('url', 'https://' + domain)
+              last   = entry.get('last_refreshed', entry.get('scanned_at', ''))
+              try:
+                  last_dt = datetime.datetime.strptime(last[:19], '%Y-%m-%dT%H:%M:%S')
+              except:
+                  stale += 1; continue
+
+              if last_dt < cutoff:
+                  stale += 1
+                  print(f'[SKIP] {domain} — over 90 days')
+                  continue
+
+              target_file = f'web/data/targets/{domain}.json'
+              print(f'[RUN] {domain}')
+              r = subprocess.run(
+                  ['python3', 'gobuster-recon.py', '-u', url, '-o', target_file, '--no-cache'],
+                  capture_output=True, text=True
+              )
+              if r.returncode != 0 and not open(target_file).read().strip():
+                  print(f'[WARN] {domain}: {r.stderr[:200]}')
+                  continue
+
+              with open(target_file) as f:
+                  data = json.load(f)
+              data['display_name']   = entry.get('display_name', '')
+              data['display_loc']    = entry.get('display_loc', '')
+              data['last_refreshed'] = nowstr
+              with open(target_file, 'w') as f:
+                  json.dump(data, f, indent=2)
+
+              entry.update({
+                  'finding_count': data.get('finding_count', 0),
+                  'status_2xx':    data.get('status_2xx', 0),
+                  'status_3xx':    data.get('status_3xx', 0),
+                  'has_admin':     bool(data.get('has_admin')),
+                  'has_login':     bool(data.get('has_login')),
+                  'has_phpmyadmin': bool(data.get('has_phpmyadmin')),
+                  'has_git':       bool(data.get('has_git')),
+                  'has_env':       bool(data.get('has_env')),
+                  'has_backup':    bool(data.get('has_backup')),
+                  'method':        data.get('method', 'gobuster'),
+                  'last_refreshed': nowstr,
+              })
+              active += 1
+
+          index['targets'] = sorted(index['targets'], key=lambda t: -(t.get('finding_count', 0)))
+          with open(index_file, 'w') as f:
+              json.dump(index, f, indent=2)
+          print(f'[DONE] refreshed={active} skipped={stale}')
+          PYEOF
+
+      - name: Commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/data/
+          git diff --cached --quiet || git commit -m "data: monthly refresh [skip ci]"
+          git push
