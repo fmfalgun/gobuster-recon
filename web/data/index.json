@@ -6,11 +6,11 @@
       "url": "https://nmap.org",
       "display_name": "fmfalgun",
       "display_loc": "Chennai, India",
-      "scanned_at": "2026-06-22T05:00:00Z",
-      "last_refreshed": "2026-06-22T05:00:00Z",
-      "finding_count": 8,
-      "status_2xx": 6,
-      "status_3xx": 2,
+      "scanned_at": "2026-06-22T07:22:22Z",
+      "last_refreshed": "2026-06-22T07:22:22Z",
+      "finding_count": 0,
+      "status_2xx": 0,
+      "status_3xx": 0,
       "has_admin": false,
       "has_login": false,
       "has_phpmyadmin": false,
@@ -19,7 +19,7 @@
       "has_backup": false,
       "mode": "dir",
       "method": "gobuster",
-      "wordlist": "common.txt"
+      "wordlist": "builtin"
     }
   ]
 }
