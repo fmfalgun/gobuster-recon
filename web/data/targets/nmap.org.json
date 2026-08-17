@@ -6,7 +6,7 @@
   "wordlist": "builtin",
   "extensions": "",
   "threads": 10,
-  "scanned_at": "2026-08-16T02:56:57Z",
+  "scanned_at": "2026-08-17T02:56:33Z",
   "cached": false,
   "method": "gobuster",
   "findings": [],
@@ -23,5 +23,5 @@
   "status_4xx": 0,
   "display_name": "fmfalgun",
   "display_loc": "Chennai, India",
-  "last_refreshed": "2026-08-16T02:56:57Z"
+  "last_refreshed": "2026-08-17T02:56:33Z"
 }
